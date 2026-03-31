@@ -48,11 +48,13 @@ class Dataset(object):
         self.y = y
 
     def iterate_once(self, batch_size):
-        assert (
-            isinstance(batch_size, int) and batch_size > 0
-        ), "Batch size should be a positive integer, got {!r}".format(batch_size)
-        assert self.x.shape[0] % batch_size == 0, "Dataset size {:d} is not divisible by batch size {:d}".format(
-            self.x.shape[0], batch_size
+        assert isinstance(batch_size, int) and batch_size > 0, (
+            "Batch size should be a positive integer, got {!r}".format(batch_size)
+        )
+        assert self.x.shape[0] % batch_size == 0, (
+            "Dataset size {:d} is not divisible by batch size {:d}".format(
+                self.x.shape[0], batch_size
+            )
         )
         index = 0
         while index < self.x.shape[0]:
@@ -117,7 +119,9 @@ class PerceptronDataset(Dataset):
                 else:
                     self.line.set_data([], [])
                 self.text.set_text(
-                    "epoch: {:,}\npoint: {:,}/{:,}\nweights: {}".format(self.epoch, i * batch_size + 1, len(self.x), w)
+                    "epoch: {:,}\npoint: {:,}/{:,}\nweights: {}".format(
+                        self.epoch, i * batch_size + 1, len(self.x), w
+                    )
                 )
                 self.fig.canvas.draw_idle()
                 self.fig.canvas.start_event_loop(1e-3)
@@ -157,9 +161,13 @@ class RegressionDataset(Dataset):
 
             if use_graphics and time.time() - self.last_update > 0.1:
                 predicted = self.model.run(nn.Constant(self.x)).data
-                loss = self.model.get_loss(nn.Constant(self.x), nn.Constant(self.y)).data
+                loss = self.model.get_loss(
+                    nn.Constant(self.x), nn.Constant(self.y)
+                ).data
                 self.learned.set_data(self.x[self.argsort_x], predicted[self.argsort_x])
-                self.text.set_text("processed: {:,}\nloss: {:.6f}".format(self.processed, loss))
+                self.text.set_text(
+                    "processed: {:,}\nloss: {:.6f}".format(self.processed, loss)
+                )
                 self.fig.canvas.draw_idle()
                 self.fig.canvas.start_event_loop(1e-3)
                 self.last_update = time.time()
@@ -204,13 +212,23 @@ class DigitClassificationDataset(Dataset):
                 ax[i].set_xlim(0, 28 * width)
                 ax[i].set_ylim(0, 28)
                 for j in range(samples):
-                    images[i].append(ax[i].imshow(np.zeros((28, 28)), vmin=0, vmax=1, cmap="Greens", alpha=0.3))
-                    texts[i].append(ax[i].text(0, 0, "", ha="center", va="top", fontsize="smaller"))
+                    images[i].append(
+                        ax[i].imshow(
+                            np.zeros((28, 28)), vmin=0, vmax=1, cmap="Greens", alpha=0.3
+                        )
+                    )
+                    texts[i].append(
+                        ax[i].text(0, 0, "", ha="center", va="top", fontsize="smaller")
+                    )
             ax[9].set_xticks(np.linspace(0, 28 * width, 11))
-            ax[9].set_xticklabels(["{:.1f}".format(num) for num in np.linspace(0, 1, 11)])
+            ax[9].set_xticklabels(
+                ["{:.1f}".format(num) for num in np.linspace(0, 1, 11)]
+            )
             ax[9].tick_params(axis="x", pad=16)
             ax[9].set_xlabel("Probability of Correct Label")
-            status = ax[0].text(0.5, 1.5, "", transform=ax[0].transAxes, ha="center", va="bottom")
+            status = ax[0].text(
+                0.5, 1.5, "", transform=ax[0].transAxes, ha="center", va="bottom"
+            )
             plt.show(block=False)
 
             self.width = width
@@ -234,8 +252,9 @@ class DigitClassificationDataset(Dataset):
                 dev_accuracy = np.mean(dev_predicted == self.dev_labels)
 
                 self.status.set_text(
-                    "epoch: {:d}, batch: {:d}/{:d}, validation accuracy: "
-                    "{:.2%}".format(self.epoch, i, len(self.x) // batch_size, dev_accuracy)
+                    "epoch: {:d}, batch: {:d}/{:d}, validation accuracy: {:.2%}".format(
+                        self.epoch, i, len(self.x) // batch_size, dev_accuracy
+                    )
                 )
                 for i in range(10):
                     predicted = dev_predicted[self.dev_labels == i]
@@ -243,7 +262,10 @@ class DigitClassificationDataset(Dataset):
                     linspace = np.linspace(0, len(probs) - 1, self.samples).astype(int)
                     indices = probs.argsort()[linspace]
                     for j, (prob, image) in enumerate(
-                        zip(probs[indices], self.dev_images[self.dev_labels == i][indices])
+                        zip(
+                            probs[indices],
+                            self.dev_images[self.dev_labels == i][indices],
+                        )
                     ):
                         self.images[i][j].set_data(image.reshape((28, 28)))
                         left = prob * (self.width - 1) * 28
@@ -323,7 +345,9 @@ alphabet above have been substituted with ASCII symbols.""".strip()
         self.word_template = "  "
         self.word_template += "{:<NUM} ".replace("NUM", str(max_word_len))
         self.word_template += "{:<NUM} ({:6.1%})".replace("NUM", str(max_lang_len))
-        self.word_template += " {:<NUM} ".replace("NUM", str(max_lang_len + len("Pred: ")))
+        self.word_template += " {:<NUM} ".replace(
+            "NUM", str(max_lang_len + len("Pred: "))
+        )
         for i in range(len(self.language_names)):
             self.word_template += "|{}".format(self.language_codes[i])
             self.word_template += "{probs[" + str(i) + "]:4.0%}"
@@ -335,9 +359,9 @@ alphabet above have been substituted with ASCII symbols.""".strip()
         for i in range(inp_x.shape[1]):
             if np.all(inp_x[:, i] == -1):
                 break
-            assert not np.any(
-                inp_x[:, i] == -1
-            ), "Please report this error in the project: batching by length was done incorrectly in the provided code"
+            assert not np.any(inp_x[:, i] == -1), (
+                "Please report this error in the project: batching by length was done incorrectly in the provided code"
+            )
             x = np.eye(len(self.chars))[inp_x[:, i]]
             xs.append(nn.Constant(x))
         y = np.eye(len(self.language_names))[inp_y]
@@ -375,19 +399,24 @@ alphabet above have been substituted with ASCII symbols.""".strip()
         return all_predicted_probs, all_predicted, all_correct
 
     def iterate_once(self, batch_size):
-        assert (
-            isinstance(batch_size, int) and batch_size > 0
-        ), "Batch size should be a positive integer, got {!r}".format(batch_size)
-        assert self.train_x.shape[0] >= batch_size, "Dataset size {:d} is smaller than the batch size {:d}".format(
-            self.train_x.shape[0], batch_size
+        assert isinstance(batch_size, int) and batch_size > 0, (
+            "Batch size should be a positive integer, got {!r}".format(batch_size)
+        )
+        assert self.train_x.shape[0] >= batch_size, (
+            "Dataset size {:d} is smaller than the batch size {:d}".format(
+                self.train_x.shape[0], batch_size
+            )
         )
 
         self.epoch += 1
 
         for iteration in range(self.train_x.shape[0] // batch_size):
-            bucket_id = np.random.choice(self.bucket_weights.shape[0], p=self.bucket_weights)
+            bucket_id = np.random.choice(
+                self.bucket_weights.shape[0], p=self.bucket_weights
+            )
             example_ids = self.train_buckets[bucket_id, 0] + np.random.choice(
-                self.train_buckets[bucket_id, 1] - self.train_buckets[bucket_id, 0], size=batch_size
+                self.train_buckets[bucket_id, 1] - self.train_buckets[bucket_id, 0],
+                size=batch_size,
             )
 
             yield self._encode(self.train_x[example_ids], self.train_y[example_ids])
@@ -397,19 +426,27 @@ alphabet above have been substituted with ASCII symbols.""".strip()
                 dev_accuracy = np.mean(dev_predicted == dev_correct)
 
                 print(
-                    "epoch {:,} iteration {:,} validation-accuracy {:.1%}".format(self.epoch, iteration, dev_accuracy)
+                    "epoch {:,} iteration {:,} validation-accuracy {:.1%}".format(
+                        self.epoch, iteration, dev_accuracy
+                    )
                 )
 
                 for idx in self.spotlight_idxs:
                     correct = dev_predicted[idx] == dev_correct[idx]
-                    word = "".join([self.chars_print[ch] for ch in self.dev_x[idx] if ch != -1])
+                    word = "".join(
+                        [self.chars_print[ch] for ch in self.dev_x[idx] if ch != -1]
+                    )
 
                     print(
                         self.word_template.format(
                             word,
                             self.language_names[dev_correct[idx]],
                             dev_predicted_probs[idx, dev_correct[idx]],
-                            "" if correct else self.predicted_template.format(self.language_names[dev_predicted[idx]]),
+                            ""
+                            if correct
+                            else self.predicted_template.format(
+                                self.language_names[dev_predicted[idx]]
+                            ),
                             probs=dev_predicted_probs[idx, :],
                         )
                     )

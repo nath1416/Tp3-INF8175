@@ -5,6 +5,7 @@ from backend import PerceptronDataset, RegressionDataset, DigitClassificationDat
 # np numpy
 import numpy as np
 
+
 class PerceptronModel(object):
     def __init__(self, dimensions: int) -> None:
         """
@@ -33,7 +34,7 @@ class PerceptronModel(object):
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
         # # pred = nn.Node()
-        
+
         return nn.DotProduct(self.get_weights(), x)
 
     def get_prediction(self, x: nn.Constant) -> int:

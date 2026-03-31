@@ -61,9 +61,7 @@ class Tracker(object):
                 print(
                     """*** NOTE: Make sure to complete Question {} before working on Question {},
 *** because Question {} builds upon your answer for Question {}.
-""".format(
-                        prereq, q, q, prereq
-                    )
+""".format(prereq, q, q, prereq)
                 )
                 return False
 
@@ -95,7 +93,9 @@ class Tracker(object):
         assert self.possible_points_remaining == 0
         print(
             "\n### Question {}: {}/{} ###".format(
-                self.current_question, self.points[self.current_question], self.maxes[self.current_question]
+                self.current_question,
+                self.points[self.current_question],
+                self.maxes[self.current_question],
             )
         )
 
@@ -111,8 +111,10 @@ class Tracker(object):
         for q in self.questions:
             print("Question %s: %d/%d" % (q, self.points[q], self.maxes[q]))
         print("------------------")
-        print("Total: %d/%d" % (sum(self.points.values()), sum([self.maxes[q] for q in self.questions])))
-
+        print(
+            "Total: %d/%d"
+            % (sum(self.points.values()), sum([self.maxes[q] for q in self.questions]))
+        )
 
     def add_points(self, pts):
         self.points[self.current_question] += pts
@@ -149,13 +151,23 @@ def parse_options(argv):
         check_dependencies=False,
     )
     parser.add_option(
-        "--edx-output", dest="edx_output", action="store_true", help="Ignored, present for compatibility only"
+        "--edx-output",
+        dest="edx_output",
+        action="store_true",
+        help="Ignored, present for compatibility only",
     )
     parser.add_option(
-        "--gradescope-output", dest="gs_output", action="store_true", help="Ignored, present for compatibility only"
+        "--gradescope-output",
+        dest="gs_output",
+        action="store_true",
+        help="Ignored, present for compatibility only",
     )
     parser.add_option(
-        "--question", "-q", dest="grade_question", default=None, help="Grade only one question (e.g. `-q q1`)"
+        "--question",
+        "-q",
+        dest="grade_question",
+        default=None,
+        help="Grade only one question (e.g. `-q q1`)",
     )
     parser.add_option(
         "--no-graphics",
@@ -163,7 +175,12 @@ def parse_options(argv):
         action="store_true",
         help="Do not display graphics (visualizing your implementation is highly recommended for debugging).",
     )
-    parser.add_option("--mute", dest="mute_output", action="store_true", help="Mute output from executing tests")
+    parser.add_option(
+        "--mute",
+        dest="mute_output",
+        action="store_true",
+        help="Mute output from executing tests",
+    )
     parser.add_option(
         "--check-dependencies",
         dest="check_dependencies",
@@ -270,30 +287,45 @@ def no_graphics():
 
 def verify_node(node, expected_type, expected_shape, method_name):
     if expected_type == "parameter":
-        assert node is not None, "{} should return an instance of nn.Parameter, not None".format(method_name)
-        assert isinstance(
-            node, nn.Parameter
-        ), "{} should return an instance of nn.Parameter, instead got type {!r}".format(
-            method_name, type(node).__name__
+        assert node is not None, (
+            "{} should return an instance of nn.Parameter, not None".format(method_name)
+        )
+        assert isinstance(node, nn.Parameter), (
+            "{} should return an instance of nn.Parameter, instead got type {!r}".format(
+                method_name, type(node).__name__
+            )
         )
     elif expected_type == "loss":
-        assert node is not None, "{} should return an instance a loss node, not None".format(method_name)
-        assert isinstance(
-            node, (nn.SquareLoss, nn.SoftmaxLoss)
-        ), "{} should return a loss node, instead got type {!r}".format(method_name, type(node).__name__)
+        assert node is not None, (
+            "{} should return an instance a loss node, not None".format(method_name)
+        )
+        assert isinstance(node, (nn.SquareLoss, nn.SoftmaxLoss)), (
+            "{} should return a loss node, instead got type {!r}".format(
+                method_name, type(node).__name__
+            )
+        )
     elif expected_type == "node":
-        assert node is not None, "{} should return a node object, not None".format(method_name)
-        assert isinstance(node, nn.Node), "{} should return a node object, instead got type {!r}".format(
-            method_name, type(node).__name__
+        assert node is not None, "{} should return a node object, not None".format(
+            method_name
+        )
+        assert isinstance(node, nn.Node), (
+            "{} should return a node object, instead got type {!r}".format(
+                method_name, type(node).__name__
+            )
         )
     else:
         assert False, "If you see this message, please report a bug in the autograder"
 
     if expected_type != "loss":
         assert all(
-            [(expected == "?" or actual == expected) for (actual, expected) in zip(node.data.shape, expected_shape)]
+            [
+                (expected == "?" or actual == expected)
+                for (actual, expected) in zip(node.data.shape, expected_shape)
+            ]
         ), "{} should return an object with shape {}, got {}".format(
-            method_name, nn.format_shape(expected_shape), nn.format_shape(node.data.shape)
+            method_name,
+            nn.format_shape(expected_shape),
+            nn.format_shape(node.data.shape),
         )
 
 
@@ -326,22 +358,26 @@ def check_perceptron(tracker):
     for dimensions in range(1, 10):
         p = models.PerceptronModel(dimensions)
         p_weights = p.get_weights()
-        verify_node(p_weights, "parameter", (1, dimensions), "PerceptronModel.get_weights()")
+        verify_node(
+            p_weights, "parameter", (1, dimensions), "PerceptronModel.get_weights()"
+        )
 
     # Check that run returns a node, and that the score in the node is correct
     for dimensions in range(1, 10):
         p = models.PerceptronModel(dimensions)
         p_weights = p.get_weights()
-        verify_node(p_weights, "parameter", (1, dimensions), "PerceptronModel.get_weights()")
+        verify_node(
+            p_weights, "parameter", (1, dimensions), "PerceptronModel.get_weights()"
+        )
         point = np_random.uniform(-10, 10, (1, dimensions))
         score = p.run(nn.Constant(point))
         verify_node(score, "node", (1, 1), "PerceptronModel.run()")
         calculated_score = nn.as_scalar(score)
         expected_score = float(np.dot(point.flatten(), p_weights.data.flatten()))
-        assert np.isclose(
-            calculated_score, expected_score
-        ), "The score computed by PerceptronModel.run() ({:.4f}) does not match the expected score ({:.4f})".format(
-            calculated_score, expected_score
+        assert np.isclose(calculated_score, expected_score), (
+            "The score computed by PerceptronModel.run() ({:.4f}) does not match the expected score ({:.4f})".format(
+                calculated_score, expected_score
+            )
         )
 
     # Check that get_prediction returns the correct values, including the
@@ -351,15 +387,21 @@ def check_perceptron(tracker):
         random_point = np_random.uniform(-10, 10, (1, dimensions))
         for point in (random_point, np.zeros_like(random_point)):
             prediction = p.get_prediction(nn.Constant(point))
-            assert (
-                prediction == 1 or prediction == -1
-            ), "PerceptronModel.get_prediction() should return 1 or -1, not {}".format(prediction)
+            assert prediction == 1 or prediction == -1, (
+                "PerceptronModel.get_prediction() should return 1 or -1, not {}".format(
+                    prediction
+                )
+            )
 
-            expected_prediction = np.where(np.dot(point, p.get_weights().data.T) >= 0, 1, -1).item()
+            expected_prediction = np.where(
+                np.dot(point, p.get_weights().data.T) >= 0, 1, -1
+            ).item()
 
-            assert (
-                prediction == expected_prediction
-            ), "PerceptronModel.get_prediction() returned {}; expected {}".format(prediction, expected_prediction)
+            assert prediction == expected_prediction, (
+                "PerceptronModel.get_prediction() returned {}; expected {}".format(
+                    prediction, expected_prediction
+                )
+            )
 
     tracker.add_points(2)  # Partial credit for passing sanity checks
 
@@ -377,7 +419,9 @@ def check_perceptron(tracker):
             # This autograder test doesn't work when weights are exactly zero
             continue
         point = multiplier * orig_weights
-        sanity_dataset = backend.Dataset(x=np.tile(point, (500, 1)), y=np.ones((500, 1)) * -1.0)
+        sanity_dataset = backend.Dataset(
+            x=np.tile(point, (500, 1)), y=np.ones((500, 1)) * -1.0
+        )
         p.train(sanity_dataset)
         new_weights = p.get_weights().data.reshape((1, dimensions))
 
@@ -388,11 +432,19 @@ def check_perceptron(tracker):
 
         if not np.all(new_weights == expected_weights):
             print()
-            print("Initial perceptron weights were: [{:.4f}, {:.4f}]".format(orig_weights[0, 0], orig_weights[0, 1]))
+            print(
+                "Initial perceptron weights were: [{:.4f}, {:.4f}]".format(
+                    orig_weights[0, 0], orig_weights[0, 1]
+                )
+            )
             print("All data points in the dataset were identical and had:")
             print("    x = [{:.4f}, {:.4f}]".format(point[0, 0], point[0, 1]))
             print("    y = -1")
-            print("Your trained weights were: [{:.4f}, {:.4f}]".format(new_weights[0, 0], new_weights[0, 1]))
+            print(
+                "Your trained weights were: [{:.4f}, {:.4f}]".format(
+                    new_weights[0, 0], new_weights[0, 1]
+                )
+            )
             print(
                 "Expected weights after training: [{:.4f}, {:.4f}]".format(
                     expected_weights[0, 0], expected_weights[0, 1]
@@ -410,12 +462,19 @@ def check_perceptron(tracker):
 
     assert dataset.epoch != 0, "Perceptron code never iterated over the training data"
 
-    accuracy = np.mean(np.where(np.dot(dataset.x, model.get_weights().data.T) >= 0.0, 1.0, -1.0) == dataset.y)
+    accuracy = np.mean(
+        np.where(np.dot(dataset.x, model.get_weights().data.T) >= 0.0, 1.0, -1.0)
+        == dataset.y
+    )
     if accuracy < 1.0:
         print(
-            "The weights learned by your perceptron correctly classified {:.2%} of training examples".format(accuracy)
+            "The weights learned by your perceptron correctly classified {:.2%} of training examples".format(
+                accuracy
+            )
         )
-        print("To receive full points for this question, your perceptron must converge to 100% accuracy")
+        print(
+            "To receive full points for this question, your perceptron must converge to 100% accuracy"
+        )
         return
 
     tracker.add_points(4)
@@ -435,15 +494,19 @@ def check_regression(tracker):
         output_node = model.run(inp_x)
         verify_node(output_node, "node", (batch_size, 1), "RegressionModel.run()")
         trace = trace_node(output_node)
-        assert inp_x in trace, "Node returned from RegressionModel.run() does not depend on the provided input (x)"
+        assert inp_x in trace, (
+            "Node returned from RegressionModel.run() does not depend on the provided input (x)"
+        )
 
         if detected_parameters is None:
-            detected_parameters = [node for node in trace if isinstance(node, nn.Parameter)]
+            detected_parameters = [
+                node for node in trace if isinstance(node, nn.Parameter)
+            ]
 
         for node in trace:
-            assert (
-                not isinstance(node, nn.Parameter) or node in detected_parameters
-            ), "Calling RegressionModel.run() multiple times should always re-use the same parameters, but a new nn.Parameter object was detected"
+            assert not isinstance(node, nn.Parameter) or node in detected_parameters, (
+                "Calling RegressionModel.run() multiple times should always re-use the same parameters, but a new nn.Parameter object was detected"
+            )
 
     for batch_size in (1, 2, 4):
         inp_x = nn.Constant(dataset.x[:batch_size])
@@ -451,15 +514,17 @@ def check_regression(tracker):
         loss_node = model.get_loss(inp_x, inp_y)
         verify_node(loss_node, "loss", None, "RegressionModel.get_loss()")
         trace = trace_node(loss_node)
-        assert inp_x in trace, "Node returned from RegressionModel.get_loss() does not depend on the provided input (x)"
-        assert (
-            inp_y in trace
-        ), "Node returned from RegressionModel.get_loss() does not depend on the provided labels (y)"
+        assert inp_x in trace, (
+            "Node returned from RegressionModel.get_loss() does not depend on the provided input (x)"
+        )
+        assert inp_y in trace, (
+            "Node returned from RegressionModel.get_loss() does not depend on the provided labels (y)"
+        )
 
         for node in trace:
-            assert (
-                not isinstance(node, nn.Parameter) or node in detected_parameters
-            ), "RegressionModel.get_loss() should not use additional parameters not used by RegressionModel.run()"
+            assert not isinstance(node, nn.Parameter) or node in detected_parameters, (
+                "RegressionModel.get_loss() should not use additional parameters not used by RegressionModel.run()"
+            )
 
     tracker.add_points(2)  # Partial credit for passing sanity checks
 
@@ -473,7 +538,9 @@ def check_regression(tracker):
     # Re-compute the loss ourselves: otherwise get_loss() could be hard-coded
     # to always return zero
     train_predicted = model.run(nn.Constant(dataset.x))
-    verify_node(train_predicted, "node", (dataset.x.shape[0], 1), "RegressionModel.run()")
+    verify_node(
+        train_predicted, "node", (dataset.x.shape[0], 1), "RegressionModel.run()"
+    )
     sanity_loss = 0.5 * np.mean((train_predicted.data - dataset.y) ** 2)
 
     assert np.isclose(train_loss, sanity_loss), (
@@ -506,19 +573,23 @@ def check_digit_classification(tracker):
         inp_x = nn.Constant(dataset.x[:batch_size])
         inp_y = nn.Constant(dataset.y[:batch_size])
         output_node = model.run(inp_x)
-        verify_node(output_node, "node", (batch_size, 10), "DigitClassificationModel.run()")
+        verify_node(
+            output_node, "node", (batch_size, 10), "DigitClassificationModel.run()"
+        )
         trace = trace_node(output_node)
-        assert (
-            inp_x in trace
-        ), "Node returned from DigitClassificationModel.run() does not depend on the provided input (x)"
+        assert inp_x in trace, (
+            "Node returned from DigitClassificationModel.run() does not depend on the provided input (x)"
+        )
 
         if detected_parameters is None:
-            detected_parameters = [node for node in trace if isinstance(node, nn.Parameter)]
+            detected_parameters = [
+                node for node in trace if isinstance(node, nn.Parameter)
+            ]
 
         for node in trace:
-            assert (
-                not isinstance(node, nn.Parameter) or node in detected_parameters
-            ), "Calling DigitClassificationModel.run() multiple times should always re-use the same parameters, but a new nn.Parameter object was detected"
+            assert not isinstance(node, nn.Parameter) or node in detected_parameters, (
+                "Calling DigitClassificationModel.run() multiple times should always re-use the same parameters, but a new nn.Parameter object was detected"
+            )
 
     for batch_size in (1, 2, 4):
         inp_x = nn.Constant(dataset.x[:batch_size])
@@ -526,17 +597,17 @@ def check_digit_classification(tracker):
         loss_node = model.get_loss(inp_x, inp_y)
         verify_node(loss_node, "loss", None, "DigitClassificationModel.get_loss()")
         trace = trace_node(loss_node)
-        assert (
-            inp_x in trace
-        ), "Node returned from DigitClassificationModel.get_loss() does not depend on the provided input (x)"
-        assert (
-            inp_y in trace
-        ), "Node returned from DigitClassificationModel.get_loss() does not depend on the provided labels (y)"
+        assert inp_x in trace, (
+            "Node returned from DigitClassificationModel.get_loss() does not depend on the provided input (x)"
+        )
+        assert inp_y in trace, (
+            "Node returned from DigitClassificationModel.get_loss() does not depend on the provided labels (y)"
+        )
 
         for node in trace:
-            assert (
-                not isinstance(node, nn.Parameter) or node in detected_parameters
-            ), "DigitClassificationModel.get_loss() should not use additional parameters not used by DigitClassificationModel.run()"
+            assert not isinstance(node, nn.Parameter) or node in detected_parameters, (
+                "DigitClassificationModel.get_loss() should not use additional parameters not used by DigitClassificationModel.run()"
+            )
 
     tracker.add_points(2)  # Partial credit for passing sanity checks
 
@@ -556,7 +627,6 @@ def check_digit_classification(tracker):
                 test_accuracy, accuracy_threshold
             )
         )
-
 
 
 if __name__ == "__main__":
