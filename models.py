@@ -55,8 +55,13 @@ class PerceptronModel(object):
         Train the perceptron until convergence.
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
-
-        dataset.iterate_once
+        all_trained = False
+        while not all_trained:
+            all_trained = True
+            for x, y in dataset.iterate_once(1):
+                if self.get_prediction(x) != nn.as_scalar(y):
+                    self.w.update(x, nn.as_scalar(y))
+                    all_trained = False
 
 
 class RegressionModel(object):
