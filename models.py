@@ -2,6 +2,9 @@ import nn
 from backend import PerceptronDataset, RegressionDataset, DigitClassificationDataset
 
 
+# np numpy
+import numpy as np
+
 class PerceptronModel(object):
     def __init__(self, dimensions: int) -> None:
         """
@@ -29,6 +32,9 @@ class PerceptronModel(object):
         Returns: a node containing a single number (the score)
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
+        # # pred = nn.Node()
+        
+        return nn.DotProduct(self.get_weights(), x)
 
     def get_prediction(self, x: nn.Constant) -> int:
         """
@@ -38,11 +44,19 @@ class PerceptronModel(object):
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
 
+        result = nn.as_scalar(self.run(x))
+
+        if result >= 0:
+            return 1
+        return -1
+
     def train(self, dataset: PerceptronDataset) -> None:
         """
         Train the perceptron until convergence.
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
+
+        dataset.iterate_once
 
 
 class RegressionModel(object):
