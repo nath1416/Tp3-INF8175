@@ -1,3 +1,4 @@
+from operator import le
 import nn
 from backend import PerceptronDataset, RegressionDataset, DigitClassificationDataset
 
@@ -73,8 +74,20 @@ class RegressionModel(object):
     """
 
     def __init__(self) -> None:
-        # Initialize your model parameters here
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+
+        hidden_layers = 2
+        self.num_hidden_layers = hidden_layers
+
+        self.weights = []
+        self.biases = []
+
+        hidden_layers_size = 200
+        layer_sizes = [1] + [hidden_layers_size] * hidden_layers + [1]
+
+        for i in range(hidden_layers + 1):
+            self.weights.append(nn.Parameter(layer_sizes[i], layer_sizes[i + 1]))
+            self.biases.append(nn.Parameter(1, layer_sizes[i + 1]))
 
     def run(self, x: nn.Constant) -> nn.Node:
         """
@@ -86,6 +99,17 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        hidden = x
+
+        for i in range(self.num_hidden_layers):
+            hidden = nn.Linear(hidden, self.weights[i])
+            hidden = nn.AddBias(hidden, self.biases[i])
+            hidden = nn.ReLU(hidden)
+
+        output = nn.Linear(hidden, self.weights[self.num_hidden_layers])
+        output = nn.AddBias(output, self.biases[self.num_hidden_layers])
+
+        return output
 
     def get_loss(self, x: nn.Constant, y: nn.Constant) -> nn.Node:
         """
@@ -99,11 +123,34 @@ class RegressionModel(object):
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
 
+        y_pred = self.run(x)
+        return nn.SquareLoss(y, y_pred)
+
     def train(self, dataset: RegressionDataset) -> None:
         """
         Trains the model.
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        all_params = self.weights + self.biases
+
+        batch_size = dataset.x.shape[0] // 2
+        worst_loss_scalar = float("inf")
+
+        learning_rate = 0.1
+
+        for x, y in dataset.iterate_forever(batch_size):
+            if worst_loss_scalar < 0.01:
+                break
+            loss = self.get_loss(x, y)
+            loss_scalar = nn.as_scalar(loss)
+
+            if loss_scalar < worst_loss_scalar:
+                worst_loss_scalar = loss_scalar
+
+            grads = nn.gradients(loss, all_params)
+
+            for param, grad in zip(all_params, grads):
+                param.update(grad, -learning_rate)
 
 
 class DigitClassificationModel(object):
