@@ -77,12 +77,13 @@ class RegressionModel(object):
         "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
 
         hidden_layers = 2
+        hidden_layers_size = 200
+
         self.num_hidden_layers = hidden_layers
 
         self.weights = []
         self.biases = []
 
-        hidden_layers_size = 200
         layer_sizes = [1] + [hidden_layers_size] * hidden_layers + [1]
 
         for i in range(hidden_layers + 1):
@@ -139,8 +140,10 @@ class RegressionModel(object):
         learning_rate = 0.1
 
         for x, y in dataset.iterate_forever(batch_size):
+            # If any loss is less than 0.01, we can stop training
             if worst_loss_scalar < 0.01:
                 break
+
             loss = self.get_loss(x, y)
             loss_scalar = nn.as_scalar(loss)
 
