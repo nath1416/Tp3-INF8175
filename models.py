@@ -172,8 +172,23 @@ class DigitClassificationModel(object):
     """
 
     def __init__(self) -> None:
-        # Initialize your model parameters here
         "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+
+        input_layer_size = 784
+        output_layer_size = 10
+
+        hidden_layers = 2
+        hidden_layer_size = 128
+
+        self.num_hidden_layers = hidden_layers
+        self.weights = []
+        self.biases = []
+
+        layer_sizes = [input_layer_size] + [hidden_layer_size] * hidden_layers + [output_layer_size]
+
+        for i in range(hidden_layers + 1):
+            self.weights.append(nn.Parameter(layer_sizes[i], layer_sizes[i + 1]))
+            self.biases.append(nn.Parameter(1, layer_sizes[i + 1]))
 
     def run(self, x: nn.Constant) -> nn.Node:
         """
@@ -190,6 +205,17 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        hidden = x
+
+        for i in range(self.num_hidden_layers):
+            hidden = nn.Linear(hidden, self.weights[i])
+            hidden = nn.AddBias(hidden, self.biases[i])
+            hidden = nn.ReLU(hidden)
+
+        output = nn.Linear(hidden, self.weights[self.num_hidden_layers])
+        output = nn.AddBias(output, self.biases[self.num_hidden_layers])
+
+        return output
 
     def get_loss(self, x: nn.Constant, y: nn.Constant) -> nn.Node:
         """
@@ -205,9 +231,26 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        y_pred = self.run(x)
+        return nn.SoftmaxLoss(y_pred, y)
 
     def train(self, dataset: DigitClassificationDataset) -> None:
         """
         Trains the model.
         """
         "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        all_params = self.weights + self.biases
+
+        batch_size = 16
+        learning_rate = 0.04
+
+        for x, y in dataset.iterate_forever(batch_size):
+            if dataset.get_validation_accuracy() > 0.974: # A bit higher then 97% to ensure we get above the 97% threshold
+                break
+
+            loss = self.get_loss(x, y)
+
+            grads = nn.gradients(loss, all_params)
+
+            for param, grad in zip(all_params, grads):
+                param.update(grad, -learning_rate)
