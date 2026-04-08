@@ -1,10 +1,5 @@
-from operator import le
 import nn
 from backend import PerceptronDataset, RegressionDataset, DigitClassificationDataset
-
-
-# np numpy
-import numpy as np
 
 
 class PerceptronModel(object):
@@ -184,7 +179,11 @@ class DigitClassificationModel(object):
         self.weights = []
         self.biases = []
 
-        layer_sizes = [input_layer_size] + [hidden_layer_size] * hidden_layers + [output_layer_size]
+        layer_sizes = (
+            [input_layer_size]
+            + [hidden_layer_size] * hidden_layers
+            + [output_layer_size]
+        )
 
         for i in range(hidden_layers + 1):
             self.weights.append(nn.Parameter(layer_sizes[i], layer_sizes[i + 1]))
@@ -245,7 +244,8 @@ class DigitClassificationModel(object):
         learning_rate = 0.04
 
         for x, y in dataset.iterate_forever(batch_size):
-            if dataset.get_validation_accuracy() > 0.974: # A bit higher then 97% to ensure we get above the 97% threshold
+            # A bit higher then 97% to ensure we get above the 97% threshold in the autograder. 
+            if dataset.get_validation_accuracy() > 0.974:
                 break
 
             loss = self.get_loss(x, y)
