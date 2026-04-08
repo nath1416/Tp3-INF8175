@@ -240,12 +240,12 @@ class DigitClassificationModel(object):
         "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
         all_params = self.weights + self.biases
 
-        batch_size = 16
+        batch_size = 20
         learning_rate = 0.04
 
         for x, y in dataset.iterate_forever(batch_size):
             # A bit higher then 97% to ensure we get above the 97% threshold in the autograder. 
-            if dataset.get_validation_accuracy() > 0.974:
+            if dataset.get_validation_accuracy() > 0.975:
                 break
 
             loss = self.get_loss(x, y)
